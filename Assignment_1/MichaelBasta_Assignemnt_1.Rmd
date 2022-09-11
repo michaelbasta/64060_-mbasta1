@@ -1,0 +1,62 @@
+---
+title: "MichaelBasta_Assignment 1"
+author: "Michael Basta"
+date: "2022-09-09"
+output: pdf_document
+---
+
+```{r}
+# Data used is the build in dataset "Credit" under the library ISLR
+library(ISLR)
+CreditData <- Credit
+summary(Credit)
+
+## Descriptive Statistics
+
+# Average Income in Thousands
+meanIncome <- mean(CreditData$Income)
+print(paste("The mean income is ", meanIncome))
+
+# Measure of Dependence - Pearson Correlation
+IncomeBalanceCor <- cor(CreditData$Income, CreditData$Balance, method = 'pearson')
+print(paste("There's mild positive correlation between the income and the balance", IncomeBalanceCor))
+
+IncomeCardsCor <- cor(CreditData$Income, CreditData$Cards, method = 'pearson')
+print(paste("Here it seems like there is almost no correlation between Income and number of credit cards", IncomeCardsCor))
+
+# Measure of Dispersion and Skewness
+paste("Standard deviation of Income")
+sd(CreditData$Income)
+
+paste("Quantile of Credit Card Balance")
+quantile(CreditData$Balance)
+
+# Measure of Frequencies for Categorical Variables
+table(CreditData$Gender)
+table(CreditData$Ethnicity)
+
+# Cross classification counts for gender by Marital status
+table(CreditData$Married, CreditData$Gender)
+
+# Data Transformation for numeric variable : Normalization
+library(caret)
+Model_range_normalized <- preProcess(CreditData, method = "range")
+Credit_Normalized = predict(Model_range_normalized, CreditData)
+paste("Summary of the Income normalized variable")
+summary(Credit_Normalized$Income)
+
+# Data Transformation for Categorical Variable : Dummy Variables
+paste("Converting the Ethnicity categorical variable into individual binary variable")
+dummy_model <- dummyVars(~Ethnicity, data = CreditData)
+head(predict(dummy_model, CreditData))
+
+# Bar plots for Average Income by years of Education
+library(ggplot2)
+ggplot(CreditData, aes(x = factor(Education), y = Income)) + geom_bar(stat = "summary", fun = "mean")
+
+# Scatter plot
+plot(CreditData$Income, CreditData$Balance, main = "Scatterplot Income vs Balance", xlab = "Income in thousands", ylab = "Credit Balance")
+
+plot(CreditData$Age, CreditData$Income, main = "Scatterplot Age vs Income", xlab = "Age", ylab = "Income in thousands")
+
+```
