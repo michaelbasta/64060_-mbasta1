@@ -1,0 +1,121 @@
+---
+title: "MichaelBasta_Assignement_2"
+author: "Michael Basta"
+date: "2022-10-02"
+output: pdf_document
+---
+
+```{r}
+# Question 1
+UB <- read.csv("C:\\Kent State\\Fall 2022\\Fundamentals of Machine Leanring\\Module 4\\UniversalBank.csv")
+
+#install.packages("fastDummies")
+library(class)
+library(ISLR)
+library(caret)
+library(fastDummies)
+summary(UB)
+
+# Converting Education to dummy variable
+UB <- dummy_cols(UB, select_columns = "Education")
+Age <- 40
+Experience <- 10
+Income <- 84
+Family <- 2
+CCAvg <- 2
+Mortgage <- 0
+Securities_Acc <- 0
+CD_Account <- 0
+Online <- 1
+Credit_Card <- 1
+Education_1 <- 0
+Education_2 <- 1
+Education_3 <- 0
+
+# Adding Values to be predicted at the top row of data
+UB[1,] <- c(1, Age, Experience, Income, 0 ,Family, CCAvg, 0, Mortgage, 0, Securities_Acc, CD_Account, Online, Credit_Card, Education_1, Education_2, Education_3)
+norm_model <- preProcess(UB, method = c('range'))
+UB_normalized <- predict(norm_model, UB)
+
+
+# Drop Columns ID, Zip Code, Original "Education" not needed after converting to dummy variable 
+UB_normalized <- UB_normalized[,-c(1,5,8)]
+
+Index_Train <- createDataPartition(UB_normalized$Personal.Loan, p=0.6, list = FALSE)
+Train <- UB_normalized[Index_Train,]
+Test <- UB_normalized[-Index_Train,]
+
+Train_Predictors <- Train[,c(1:6,8:14)]
+Test_Predictors <- Test[,c(1:6,8:14)]
+
+Train_labels <- Train[,7]
+Test_labels <- Test[,7]
+
+Predicted_Test_labels <- knn(Train_Predictors, Test_Predictors, cl=Train_labels, k=1, prob = TRUE)
+class_prob <- attr(Predicted_Test_labels, 'prob')
+
+# The first value is the one needs to be predicted 
+head(class_prob)
+
+paste("Customer will accept loan offer")
+
+
+# Question 2  
+set.seed(123)
+model <- train(Personal.Loan~Age+Experience+Income+Family+CCAvg+Mortgage+Securities.Account+CD.Account+Online+CreditCard+Education_1+Education_2+Education_3, data=UB_normalized, method="knn")
+model
+
+
+# Question 3
+#install.packages("gmodels")
+library("gmodels")
+CrossTable(x=Test_labels, y=Predicted_Test_labels, prop.chisq = FALSE)
+
+
+# Question 4
+
+Predicted_Test_labels_bestK <- knn(Train_Predictors, Test_Predictors, cl=Train_labels, k=5, prob = TRUE)
+class_prob_bestK <- attr(Predicted_Test_labels_bestK, 'prob')
+
+# The first value is the one needs to be predicted 
+head(class_prob_bestK)
+
+paste("Customer will accept loan offer")
+
+# Question 5
+
+# Partitioning the data into 
+# 50% training 30% Validation 20% Testing
+
+# Taking the test portion from the data to apply the model
+# 20% * 5000 = 1000
+UB_Test_Normalized <- UB_normalized[4000:5000,]
+UB_normalized <- UB_normalized[1:4000,]
+
+# training is 2500
+# 2500 / 4000 = 0.625
+Index_Train <- createDataPartition(UB_normalized$Personal.Loan, p=0.625, list = FALSE)
+Train <- UB_normalized[Index_Train,]
+Validation <- UB_normalized[-Index_Train,]
+
+Train_Predictors <- Train[,c(1:6,8:14)]
+Validation_Predictors <- Validation[,c(1:6,8:14)]
+
+Test_Predictors <- UB_Test_Normalized[,c(1:6,8:14)]
+
+Train_labels <- Train[,7]
+Validation_labels <- Validation[,7]
+
+Test_labels <- UB_Test_Normalized[,7]
+
+Predicted_Validation_labels <- knn(Train_Predictors, Validation_Predictors, cl=Train_labels, k=5, prob = TRUE)
+CrossTable(x=Validation_labels, y=Predicted_Validation_labels, prop.chisq = FALSE)
+
+
+Predicted_Test_Labels<- knn(Train_Predictors, Test_Predictors, cl=Train_labels, k=5, prob = TRUE)
+CrossTable(x=Test_labels, y=Predicted_Test_Labels, prop.chisq = FALSE)
+
+paste("It looks like there's way less misclassified cases when we applied it on the test data than the validation data Validation: total 89 misclassified cases / Test: total 45 misclassified cases")
+
+```
+
