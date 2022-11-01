@@ -1,0 +1,60 @@
+---
+title: "MichaelBasta_Assignment_4"
+author: "Michael Basta"
+date: "2022-10-30"
+output: pdf_document
+---
+
+```{r cars}
+Pharma <- read.csv("/Users/michaelbasta/Documents/Fundmentals of Machine Learning /Module 6/Pharmaceuticals.csv")
+library(tidyverse)
+library(factoextra)
+library(ISLR)
+#install.packages("flexclust")
+library(flexclust)
+
+set.seed(123)
+
+# a.
+
+df <- Pharma[,3:11]
+summary(df)
+# It doesn't seem that there's a direct correlation between variables so Euclidean distance should be suitable in this case
+# Also since it is scale dependant we had to scale it before applying 
+df <- scale(df)
+distance <- get_dist(df)
+fviz_dist(distance)
+
+fviz_nbclust(df, kmeans, method="wss")
+fviz_nbclust(df, kmeans, method="silhouette")
+
+# From the earlier step it shows that 5 clusters is the best choice 
+k4 <- kmeans(df, centers=5, nstart=25)
+fviz_cluster(k4, data = df)
+k4$size
+k4$centers
+
+
+k4 = kcca(df, k=5, kccaFamily("kmeans"))
+clusters_index = predict(k4)
+image(k4)
+
+
+# b. 
+## Looking at the data from the centroids of the clusters
+## Cluster 1: (Market_cap, Beta, PE_Ratio, Leverage, Rev_Growth) are Lower than average (negative values) and (ROE, ROA, Asset_Turnover, Net_Profit_Margin) are above average (Positive values)
+## Cluster 2: (Market_cap, PE_Ratio, ROE, ROA, Asset_Turnover, Rev_Growth, Net_Profit_Margin) are Lower than average (negative values) and (Beta, Leverage) are above average (Positive values)
+## Cluster 3:(Market_cap, Beta, ROE, ROA, Leverage, Rev_Growth) are Lower than average (negative values) and (PE_Ratio, Asset_Turnover) are above average (Positive values)
+## Cluster 4: (Beta, PE_Ratio, Leverage) are Lower than average (negative values) and (Market_Cap, ROE, ROA, Asset_Turnover, Rev_Growth, Net_Profit_Margin) are above average (Positive values)
+## Cluster 5:(Market_Cap, PE_Ratio, ROE, ROA, Asset_Turnover, Net_Profit_Margin) are Lower than average (negative values) and (Beta, Leveerage, Rev_Growth) are above average (Positive values)
+
+# c.
+## I don't see a pattern in the clusters with respect to the non-numerical variables
+
+# d.
+## Cluster 1: High returns and turnover
+## Cluster 2: High leverage 
+## Cluster 3: High Price/earnings ratio
+## Cluster 4: High Market Capitalization and returns
+## Cluster 5: High Revenew Growth
+```
