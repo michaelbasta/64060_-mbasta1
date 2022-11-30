@@ -1,0 +1,103 @@
+---
+title: "MichaelBasta_Assignment_5"
+author: "Michael Basta"
+date: "2022-11-28"
+output: pdf_document
+---
+
+
+```{r cars}
+
+Cereals <- read.csv("/Users/michaelbasta/Documents/Fundmentals of Machine Learning /Module 8/Cereals.csv")
+
+df <- Cereals
+row.names(df) <- df$name
+df <- na.omit(df)
+# eliminating all the non
+df <- df[,4:16]
+df <- scale(df)
+head(df)
+
+d <- dist(df, method = "euclidean")
+# Hierarchical clustering using Complete Linkage
+hc1 <- hclust(d, method = "complete")
+
+# Plot the obtained dendogram
+plot(hc1, cex = 0.6, hang = -1)
+
+library(cluster)
+
+# Compute with agnes and with different Linkage methods
+hc_single <- agnes(df, method = "single")
+hc_complete <- agnes(df, method = "complete")
+hc_average <- agnes(df, method = "average")
+
+# Compare Agglomerative coefficients
+print(hc_single$ac)
+
+print(hc_complete$ac)
+
+print(hc_average$ac)
+
+pltree(hc_complete, cex = 0.6, hang = -1, main = "Dedrogram of agnes")
+
+paste("Best Linkage method is the complete with the highest cofficient")
+
+# Marking clusters to see the best number
+hc_complete <- hclust(d, method = "complete")
+
+# plot dendrogram
+plot(hc_complete, cex = 0.6)
+rect.hclust(hc_complete, k = 7, border = 1:5)
+
+paste("The choice for clusters is 7 based on the height chosen")
+
+
+# In order to check the stability of the clusters we need to partition data and then see how well clusters formed based on part
+
+Index <- 1:38
+# Partition A
+Train <- df[Index,]
+
+# Partition B
+Test <- df[-Index,]
+
+# Applying clustering on partition A 
+d <- dist(Train, method = "euclidean")
+hc_complete <- hclust(d, method = "centroid")
+
+plot(hc_complete, cex = 0.6)
+
+hc_single <- agnes(Train, method = "single")
+hc_complete <- agnes(Train, method = "complete")
+hc_average <- agnes(Train, method = "average")
+
+# Compare Agglomerative coefficients
+print(hc_single$ac)
+
+print(hc_complete$ac)
+
+print(hc_average$ac)
+
+## From what is seen on the partition dendrogram and the agglomerative coefficients we see the structure is less stable
+
+# To be able to cluster "Healthy Cereals" We will consider only (Protien, Fiber, Vitamins, rating)
+## Yes data should be normalized As we don't want the clustering algorithm to depend to an arbitrary variable unit
+
+df <- Cereals
+row.names(df) <- df$name
+df <- na.omit(df)
+# Only Selecting the columns contributing to healthy cereals
+df <- df[,c(5,8,12,16)]
+df <- scale(df)
+head(df)
+
+d <- dist(df, method = "euclidean")
+# Hierarchical clustering using Complete Linkage
+hc1 <- hclust(d, method = "complete")
+
+# Plot the obtained dendogram
+plot(hc1, cex = 0.6, hang = -1)
+
+```
+
