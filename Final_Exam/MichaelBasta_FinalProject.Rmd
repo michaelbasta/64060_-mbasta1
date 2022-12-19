@@ -1,0 +1,91 @@
+---
+title: "MichaelBasta_FinalProject"
+author: "Michael Basta"
+date: "2022-12-12"
+output: pdf_document
+---
+
+```{r cars}
+library(tidyverse)
+library(factoextra)
+library(ISLR)
+library(flexclust)
+
+MallCustomers <- read.csv("/Users/michaelbasta/Documents/Fundmentals of Machine Learning /Final/Mall Customers Data/Mall_Customers.csv")
+
+paste("Data used is Mall Customers data consisting of 5 columns 
+      (CustomerId - Gender - Age - Annual Income in K - Spending Score 1-100)")
+head(MallCustomers)
+
+paste("Histogram plot to show the destribution of Age in the Customers data")
+x <- MallCustomers$Age
+h<-hist(x, main = "Histogram of Age", col = "red", xlab="Age")
+xfit <- seq(min(x), max(x), length=40)
+yfit <- dnorm(xfit, mean = mean(x),sd=sd(x))
+yfit <- yfit*diff(h$mids[1:2])*length(x)
+lines(xfit, yfit, col="blue", lwd=2)
+
+
+paste("Histogram plot to show the destribution of 
+      Annual Income in the Customers data")
+x <- MallCustomers$Annual.Income..k..
+h<-hist(x, main = "Histogram of 
+        Annual Income", col = "red", xlab="Annual Income")
+xfit <- seq(min(x), max(x), length=40)
+yfit <- dnorm(xfit, mean = mean(x),sd=sd(x))
+yfit <- yfit*diff(h$mids[1:2])*length(x)
+lines(xfit, yfit, col="blue", lwd=2)
+
+
+paste("Histogram plot to show the destribution of 
+      Spending Score in the Customers data")
+x <- MallCustomers$Spending.Score..1.100.
+h<-hist(x, main = "Histogram of Spending", col = "red", xlab="Spening Score")
+xfit <- seq(min(x), max(x), length=40)
+yfit <- dnorm(xfit, mean = mean(x),sd=sd(x))
+yfit <- yfit*diff(h$mids[1:2])*length(x)
+lines(xfit, yfit, col="blue", lwd=2)
+
+paste("Plot for Age Against Income to see corrolation")
+y <- MallCustomers$Annual.Income..k..
+x <- MallCustomers$Age
+plot(x, y, col="red", xlab = "Age", ylab = "Income")
+abline(lm(y ~ x), col='blue')
+
+paste("Plot for Age Against Spending Score to see corrolation")
+y <- MallCustomers$Spending.Score..1.100.
+x <- MallCustomers$Age
+plot(x, y, col="red", xlab = "Age", ylab = "Spending")
+abline(lm(y ~ x), col='blue')
+
+paste("Plot for Income Against Spending Score to see corrolation")
+y <- MallCustomers$Spending.Score..1.100.
+x <- MallCustomers$Annual.Income..k..
+plot(x, y, col="red", xlab = "Income", ylab = "Spending")
+abline(lm(y ~ x), col='blue')
+
+
+
+df <- MallCustomers[,3:5]
+summary(df)
+# It doesn't seem that there's a direct 
+# correlation between variables so 
+# Euclidean distance should be suitable in this case
+# Also since it is scale dependant we had to scale it before applying 
+df <- scale(df)
+distance <- get_dist(df)
+fviz_dist(distance)
+fviz_nbclust(df, kmeans, method="wss")
+fviz_nbclust(df, kmeans, method="silhouette")
+
+# From the earlier step it shows that 4 clusters is the best choice 
+k4 <- kmeans(df, centers=4, nstart=25)
+fviz_cluster(k4, data = df)
+k4$size
+k4$centers
+
+k4 = kcca(df, k=4, kccaFamily("kmeans"))
+clusters_index = predict(k4)
+image(k4)
+```
+
